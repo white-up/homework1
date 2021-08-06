@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=edge" http-equiv="X-UA-Compatible">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>功能</title>
+  <!-- 引入 ECharts 文件 -->
+  <script src="js/echarts.min.js"></script>
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script>
+
+    const reg_flag = /^\w{0,10}$/;//位数限定
+    <!--主页-->
+    function SetSawHome() {
+      $("#homeB").css("display", "inline");
+      $("#userListB").css("display", "none");
+      $("#dataStatisticsB").css("display","none");
+      $("#dataChangeB").css("display","none");
+    }
+    <!--成员列表-->
+    function SetSawList() {
+      $("#homeB").css("display", "none");
+      $("#dataStatisticsB").css("display","none");
+      $("#dataChangeB").css("display","none");
+      $("#userListB").css("display", "inline");
+    }
+    <!--数据统计-->
+    function setSawDataStatistics(){
+      $("#homeB").css("display", "none");
+      $("#userListB").css("display", "none");
+      $("#dataChangeB").css("display","none");
+      $("#dataStatisticsB").css("display","inline");
+      setECharts1();
+    }
+    //修改记录
+    function setSawDataChange(){
+      $("#homeB").css("display", "none");
+      $("#userListB").css("display", "none");
+      $("#dataStatisticsB").css("display","none");
+      $("#dataChangeB").css("display","inline");
+
+    }
+    function loadChangeRecord(currentPage){
+      $.get("changeRecordListServlet",{
+        currentPageChange:currentPage
+      },function (pb){
+        $("#totalPageChange").html(pb.totalPage);
+        $("#totalCountChange").html(pb.totalCount);
+        var lis = "";
+        var fristPage = '<li onclick="javascipt:loadChangeRecord(1)"><a href="javascript:void(0)">首页</a></li>';
+        //计算上一页的页码
+        var beforeNum = pb.currentPage - 1;
+        if (beforeNum <= 0) {
+          beforeNum = 1;
+        }
+        var beforePage = '<li  onclick="javascipt:loadChangeRecord(beforeNum)" class="threeword"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>';
+        lis += fristPage;
+        lis += beforePage;
+        var begin; // 开始位置
+        var end; //  结束位置
+        //1.要显示10个页码
+        if (pb.totalPage < 10) {
+          //总页码不够10页
+          begin = 1;
+          end = pb.totalPage;
+        } else {
+          //总页码超过10页
+          begin = pb.currentPage - 5;
+          end = pb.currentPage + 4;
+          //2.如果前边不够5个，后边补齐10个
+          if (begin < 1) {
+            begin = 1;
+            end = begin + 9;
+          }
+          //3.如果后边不足4个，前边补齐10个
+          if (end > pb.totalPage) {
+            end = pb.totalPage;
+            begin = end - 9;
+          }
+        }
+        for (var i = begin; i <= end; i++) {
+          var li;
+          //判断当前页码是否等于i
+          if (pb.currentPage == i) {
+            li = '<li class="curPage" onclick="javascipt:loadChangeRecord(i)"><a href="javascript:void(0)">' + i + '</a></li>';
+          } else {
+            //创建页码的li
+            li = '<li onclick="javascipt:loadChangeRecord(' +' i' +' )"><a href="javascript:void(0)">' + i + '</a></li>';
+          }
+          //拼接字符串
+          lis += li;
+        }
+        var lastPage = '<li onclick="javascipt:loadChangeRecord(' + pb.totalPage + ')"><a href="javascript:void(0)">末页</a></li>';
+        var nextNum = currentPage + 1;
+        var nextPage = '<li  onclick="javascipt:loadChangeRecord(' + nextNum + ')" class="threeword"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">&raquo;</span></a></li>';
+        lis += nextPage;
+        lis += lastPage;
+        //将lis内容设置到 ul
+        $("#pageNumChange").html(lis);
+        var str = "";
+        $("#dataChangeTable  tr:not(:first)").html("");
+        for (var i = 0; i < pb.list.length; i++) {
+          var data = pb.list[i];
+          str = "<tr><td>" + data.id+ "</td><td>" + data.name+
+                  "</td><td>" + data.time + "</td><td>" + data.changeObject +
+                  "</td><td>" + data.startData + "</td><td>"  + data.endData+ "</td></tr>";
+                  //+ "</td><td><a class='btn btn-default btn-sm' href='/updateServlet?id=" + data.id + "'>修改</a>&nbsp;\n"
+                  //+ "<a class='btn btn-default btn-sm' href='javascript:deleteUser(" + data.id + ");'>删除</a></td></tr>";
+          $("#dataChangeTable").append(str);
+        }
+        //定位到页面顶部
+        window.scrollTo(0, 0);
+      });
+    }
+    <!--分页查询-->
+    function load(currentPage, conditionName, conditionVal) {
+      //发送ajax请求，传递currentPage
+      $.get("userListServlet", {
+        currentPage: currentPage,
+        conditionName: encodeURI(conditionName),
+        conditionVal: encodeURI(conditionVal)
+      }, function (pb) {
+        //解析userListServlet数据，展示到页面上
+        //1.分页工具条数据展示
+        //1.1 展示总页码和总记录数
+        $("#totalPage").html(pb.totalPage);
+        $("#totalCount").html(pb.totalCount);
+        var lis = "";
+        var fristPage = '<li onclick="javascipt:load(' + 1 + ',' + conditionName + ',' + conditionVal + ')"><a href="javascript:void(0)">首页</a></li>';
+        //计算上一页的页码
+        var beforeNum = pb.currentPage - 1;
+        if (beforeNum <= 0) {
+          beforeNum = 1;
+        }
+        var beforePage = '<li  onclick="javascipt:load(' + beforeNum + ',' + conditionName + ',' + conditionVal + ')" class="threeword"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>';
+        lis += fristPage;
+        lis += beforePage;
+        // 定义开始位置begin,结束位置 end
+        var begin; // 开始位置
+        var end; //  结束位置
+        //1.要显示10个页码
+        if (pb.totalPage < 10) {
+          //总页码不够10页
+          begin = 1;
+          end = pb.totalPage;
+        } else {
+          //总页码超过10页
+          begin = pb.currentPage - 5;
+          end = pb.currentPage + 4;
+          //2.如果前边不够5个，后边补齐10个
+          if (begin < 1) {
+            begin = 1;
+            end = begin + 9;
+          }
+          //3.如果后边不足4个，前边补齐10个
+          if (end > pb.totalPage) {
+            end = pb.totalPage;
+            begin = end - 9;
+          }
+        }
+        //分页栏
+        for (var i = begin; i <= end; i++) {
+          var li;
+          //判断当前页码是否等于i
+          if (pb.currentPage == i) {
+            li = '<li class="curPage" onclick="javascipt:load(' + i + ',' + conditionName + ',' + conditionVal + ')"><a href="javascript:void(0)">' + i + '</a></li>';
+          } else {
+            //创建页码的li
+            li = '<li onclick="javascipt:load(' + i + ',' + conditionName + ',' + conditionVal + ')"><a href="javascript:void(0)">' + i + '</a></li>';
+          }
+          //拼接字符串
+          lis += li;
+        }
+        var lastPage = '<li onclick="javascipt:load(' + pb.totalPage + ',' + conditionName + ',' + conditionVal + ')"><a href="javascript:void(0)">末页</a></li>';
+        var nextNum = currentPage + 1;
+        var nextPage = '<li  onclick="javascipt:load(' + nextNum + ',' + conditionName + ',' + conditionVal + ')" class="threeword"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">&raquo;</span></a></li>';
+        lis += nextPage;
+        lis += lastPage;
+        $("#pageNum").html(lis);//将lis内容设置到 ul
+        var str = "";
+        $("#nameTable  tr:not(:first)").html("");
+        for (var i = 0; i < pb.list.length; i++) {
+          var data = pb.list[i];
+          str = "<tr><td><input type='checkbox' name='uid' value='" + data.id + "'></td><td>" + data.name+ "</td><td>" + data.id+
+                  "</td><td>" + data.gender + "</td><td>" + data.basePay +
+                  "</td><td>" + data.jobSalary + "</td><td>"  + data.jobSubsidy
+                  + "</td><td>" + data.medicalInsurance + "</td><td>"+data.accumulationFund+"</td><td><a class='btn btn-default btn-sm' href='/updateServlet?id=" + data.id + "'>修改</a>&nbsp;\n"
+                  + "<a class='btn btn-default btn-sm' href='javascript:deleteUser(" + data.id + ");'>删除</a></td></tr>";
+          $("#nameTable").append(str);
+        }
+        //定位到页面顶部
+        window.scrollTo(0, 0);
+      });
+
+    }
+    <!--删除功能-->
+    function deleteUser(id) {
+      //用户安全提示
+      if (confirm("您确定要删除该成员吗？")) {
+        $.get("deleteUserServlet", {"id": id}, function (error) {
+          if (error.error == null) {
+            alert("修改成功,请刷新页面!");
+          } else {
+            alert(error.error);
+          }
+        });
+      }
+    }
+    <!--当前时间标题-->
+    function nowTimeText(data) {
+      var myDate = new Date();
+      var time = "现在是北京时间: ";
+      time += myDate.getFullYear();
+      time += "年 ";
+      time += (myDate.getMonth() + 1);
+      time += "月 ";
+      time += myDate.getDate();
+      time += "日 ";
+      time += myDate.getHours();
+      time += "时 ";
+      time += myDate.getMinutes();
+      time += "分 ";
+      data.text(time);
+    }
+    <!--子方法:成员列表分块查询-->
+    function FindClickAction(date) {
+      var Text = $("#" + date + "Input").val();
+      if (Text != null) {
+        load(1, "By" + date, Text);
+      } else {
+        alert("请输入正确的输入格式");
+      }
+    }
+    function findByGender(){
+      $("#genderMan").click(function (){
+        $("#genderNo").html("男");
+        load(1,"ByGender","男");
+      });
+      $("#genderWoman").click(function (){
+        $("#genderNo").html("女");
+        load(1,"ByGender","女");
+      });
+      $("#genderNo").click(function (){
+        $("#genderNo").html("无选择");
+        load(1,null,null);
+      });
+    }
+    function isRealNum(val){
+      // isNaN()函数 把空串 空格 以及NUll 按照0来处理 所以先去除，
+      if(val === "" || val ==null){
+        return false;
+      }
+      if(!isNaN(val)){
+        return true;
+      }else {
+        return false;
+      }
+    }
+    function checkId(){
+      var Text = $("#idInput").val();
+      if(isRealNum(Text)&&reg_flag.test(Text)){
+        FindClickAction("id");
+      }else {
+        alert("格式错误! 请输入纯数字且位数在0-10内.");
+      }
+
+    }
+    function setECharts1(){
+      var chartDom = document.getElementById('main1');
+      var myChart = echarts.init(chartDom);
+      var option;
+      var chartDom2 = document.getElementById('main2');
+      var myChart2 = echarts.init(chartDom2);
+      var option2;
+      $.get("statisticalDataServlet",{
+        },function (pb){
+        option = {
+          title: {
+            text: '收入统计',
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          legend: {
+            data: ['平均', '最大','最小']
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+          },
+          yAxis: {
+            type: 'category',
+            data: ['基本工资', '职务工资', '岗位津贴', '医疗保险', '公积金', '和']
+          },
+          series: [
+            {
+              name: '平均',
+              type: 'bar',
+              data: [pb[2].basePay,pb[2].jobSalary,pb[2].jobSubsidy,pb[2].medicalInsurance,pb[2].accumulationFund,pb[2].sum]
+            },
+            {
+              name: '最大',
+              type: 'bar',
+              data: [pb[0].basePay,pb[0].jobSalary,pb[0].jobSubsidy,pb[0].medicalInsurance,pb[0].accumulationFund,pb[0].sum]
+            },
+            {
+              name:'最小',
+              type:'bar',
+              data:[pb[1].basePay,pb[1].jobSalary,pb[1].jobSubsidy,pb[1].medicalInsurance,pb[1].accumulationFund,pb[1].sum]
+            }
+          ]
+        };
+        option2 = {
+          legend: {
+            top: 'bottom'
+          },
+          toolbox: {
+            show: true,
+            feature: {
+              mark: {show: true},
+              dataView: {show: true, readOnly: false},
+              restore: {show: true},
+              saveAsImage: {show: true}
+            }
+          },
+          series: [
+            {
+              name: '比例分析',
+              type: 'pie',
+              radius: [50, 250],
+              center: ['50%', '50%'],
+              roseType: 'area',
+              itemStyle: {
+                borderRadius: 10
+              },
+              data: [
+                {value: pb[2].basePay, name: '基本工资'},
+                {value: pb[2].jobSalary, name: '职务工资'},
+                {value: pb[2].jobSubsidy, name: '岗位津贴'},
+                {value: pb[2].medicalInsurance, name: '医疗保险'},
+                {value: pb[2].accumulationFund, name: '公积金'},
+              ]
+            }
+          ]
+        };
+        option2 && myChart2.setOption(option2);
+        option && myChart.setOption(option);
+      });
+    }
+    $(function () {
+      $("#addUser").click(function (){
+        window.location.href="addUser.html";
+      });
+      $("#exportData").click(function (){
+        $.get("exportDataServlet",{
+          },function (error){
+          if(error.error==null){
+            alert("导出成功!");
+          }else {
+            alert(error.error);
+          }
+        });
+      });
+      nowTimeText($("#smallText"));
+      findByGender();
+      $("#dataStatisticsA").click(function (){
+      setSawDataStatistics();
+      });
+      $("#nameButton").click(function () {
+        FindClickAction("name");
+      });
+      $("#idButton").click(function () {
+        checkId();
+      });
+      $("#homeA").click(function () {
+        SetSawHome();
+      });
+      $("#dataChangeA").click(function (){
+        setSawDataChange();
+        loadChangeRecord(1);
+      });
+      $("#userListA").click(function () {
+        load(1, null, null);
+        SetSawList();
+      });
+    });
+  </script>
+</head>
+<body>
+<!--标头-->
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">
+        功能页面
+      </a>
+    </div>
+  </div>
+</nav>
+<div class="container-fluid">
+  <!--时间标题-->
+  <div class="row">
+    <div class="col-md-5">
+      <div class="page-header">
+        <h2>　欢迎回来　<small id="smallText"></small></h2>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <!--功能选择-->
+    <div class="col-md-2">
+      <ul class="nav nav-pills nav-stacked">
+        <li class="active" role="presentation"><a href="#">功能菜单</a></li>
+        <li role="presentation"><a href="#" id="homeA">主页</a></li>
+        <li role="presentation"><a href="#" id="userListA">人员数据</a></li>
+        <li role="presentation"><a href="#" id="dataStatisticsA">数据统计</a></li>
+        <li role="presentation"><a href="#" id="dataChangeA">修改记录</a></li>
+      </ul>
+    </div>
+
+  <!--轮播图:主页-->
+  <div class="col-md-10" id="homeB" style="display: none">
+
+    <div class="carousel slide" data-ride="carousel" id="carousel-example-generic">
+      <!-- Indicators -->
+      <ol class="carousel-indicators">
+        <li class="active" data-slide-to="0" data-target="#carousel-example-generic"></li>
+        <li data-slide-to="1" data-target="#carousel-example-generic"></li>
+        <li data-slide-to="2" data-target="#carousel-example-generic"></li>
+      </ol>
+
+      <!-- Wrapper for slides -->
+      <div class="carousel-inner" role="listbox">
+        <div class="item active">
+          <img alt="..." src="img/view1.png">
+        </div>
+        <div class="item">
+          <img alt="..." src="img/view2.png">
+        </div>
+        <div class="item">
+          <img alt="..." src="img/view3.png">
+        </div>
+
+      </div>
+
+      <!-- Controls -->
+      <a class="left carousel-control" data-slide="prev" href="#carousel-example-generic" role="button">
+        <span aria-hidden="true" class="glyphicon glyphicon-chevron-left"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="right carousel-control" data-slide="next" href="#carousel-example-generic" role="button">
+        <span aria-hidden="true" class="glyphicon glyphicon-chevron-right"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div>
+
+  </div>
+  <!--用户图表:用户信息-->
+  <div class="col-md-10" id="userListB" style="display: none">
+    <!--标题-->
+    <h4 style="text-align: center">用户信息列表</h4>
+    <!--查询表格-->
+    <div class="row">
+      <!--姓名查询-->
+      <div class="col-md-2">
+        <div class="input-group">
+          <input class="form-control" id="nameInput" placeholder="姓名..." type="text">
+          <span class="input-group-btn">
+        <button class="btn btn-default" id="nameButton" type="button">查询</button>
+            </span>
+        </div>
+      </div>
+      <!--id查询-->
+      <div class="col-md-2">
+        <div class="input-group">
+          <input class="form-control" id="idInput" placeholder="id..." type="text">
+          <span class="input-group-btn">
+        <button class="btn btn-default" id="idButton" type="button">查询</button>
+      </span>
+        </div><!-- /input-group -->
+      </div><!-- /.col-lg-6 -->
+      <!--性别查询-->
+      <div class="col-md-2">
+        <div class="btn-group" role="group" aria-label="...">
+          <button type="button" id="genderMan" class="btn btn-default">男</button>
+          <button type="button" id="genderNo" class="btn btn-default">无选择</button>
+          <button type="button" id="genderWoman" class="btn btn-default">女</button>
+        </div>
+      </div>
+
+      <!--多条件查询-->
+      <div class="col-md-2">
+        <button class="btn btn-primary" id="selectsButton" type="button">多条件查询</button>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary" id="exportData" type="button">导出数据</button>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary" id="addUser" type="button" >添加成员</button>
+      </div>
+
+
+      <table class="table table-striped" id="nameTable">
+        <tr class="success">
+          <th><input id="firstCb" type="checkbox"></th>
+          <!--姓名、ID号以及基本工资、职务工资、岗位津贴、医疗保险、公积金-->
+          <th>name</th>
+          <th>id</th>
+          <th>gender</th>
+          <th>基本工资</th>
+          <th>职务工资</th>
+          <th>岗位补贴</th>
+          <th>医疗保险</th>
+          <th>公积金</th>
+          <th>操作</th>
+        </tr>
+
+      </table>
+
+    </div>
+    <!--数据信息-->
+    <div class="page_num_inf">
+      <i></i> 共
+      <span id="totalPage"></span>页<span id="totalCount"></span>条
+    </div>
+    <!--数据展示-->
+    <div class="pageNum">
+      <nav aria-label="Page navigation">
+        <ul class="pagination" id="pageNum">
+        </ul>
+      </nav>
+
+    </div>
+  </div>
+  <!--数据统计-->
+  <div class="col-md-10" id="dataStatisticsB" style="display: none">
+    <div class="row">
+      <div class="col-md-5">
+        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+        <div id="main1" style="width: 600px;height:400px;"></div>
+      </div>
+      <div class="col-md-1"></div>
+      <div class="col-md-5">
+        <div class="row"><h5>工资比例</h5></div>
+        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+        <div id="main2" style="width: 600px;height:400px;"></div>
+
+      </div>
+    </div>
+    </div>
+  <!--数据记录-->
+  <div class="col-md-10" id="dataChangeB" style="display: none">
+    <div class="table-responsive">
+      <table class="table" id="dataChangeTable">
+        <th>id</th>
+        <th>姓名</th>
+        <th>日期</th>
+        <th>修改对象</th>
+        <th>起初内容</th>
+        <th>修改内容</th>
+
+      </table>
+    </div>
+    <!--数据信息-->
+    <div class="page_num_inf">
+      <i></i> 共
+      <span id="totalPageChange"></span>页<span id="totalCountChange"></span>条
+    </div>
+    <!--数据展示-->
+    <div class="pageNum">
+      <nav aria-label="Page navigation">
+        <ul class="pagination" id="pageNumChange">
+        </ul>
+      </nav>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+</body>
+</html>

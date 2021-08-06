@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>添加成员</title>
+  <link href="css/addUserStyle.css" media="all" rel="stylesheet" type="text/css"/>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+  <!-- -->
+  <script>var __links = document.querySelectorAll('a');
+
+  function __linkClick(e) {
+    parent.window.postMessage(this.href, '*');
+  };
+  for (var i = 0, l = __links.length; i < l; i++) {
+    if (__links[i].getAttribute('data-t') == '_blank') {
+      __links[i].addEventListener('click', __linkClick, false);
+    }
+  }</script>
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <script>
+    $(document).ready(function (c) {
+    $('.alert-close').on('click', function (c) {
+      $('.message').fadeOut('slow', function (c) {
+        $('.message').remove();
+      });
+    });
+  });
+  </script>
+  <script>
+
+    function submitFunction(){
+      event.preventDefault();
+      $.get("addUserData", {
+        "name":encodeURI($("#name").val()),
+        "gender":encodeURI($("#gender").val()),
+        "basePay":encodeURI($("#basePay").val()),
+        "jobSalary":encodeURI($("#jobSalary").val()),
+        "jobSubsidy":encodeURI($("#jobSubsidy").val()),
+        "medicalInsurance":encodeURI($("#medicalInsurance").val()),
+        "accumulationFund":encodeURI($("#accumulationFund").val())
+      }, function (error) {
+        if(error.error==null){
+          alert("添加成功,请刷新页面!");
+        }else {
+          alert(error.error);
+        }
+      });
+
+    }
+
+  </script>
+
+</head>
+<body>
+<!-- contact-form -->
+<div class="message warning">
+  <div class="inset">
+    <div class="login-head">
+      <h1>添加成员</h1>
+      <div class="alert-close"></div>
+    </div>
+    <form>
+      <li>
+        <input id="name" onblur="if (this.value == '') {this.value = '姓名';}" onfocus="this.value = '';" type="text"
+               value="姓名">
+        <!--<a class="icon lock" href="#"></a>-->
+      </li>
+      <div class="clear"></div>
+      <li>
+        <input id="gender" onblur="if (this.value == '') {this.value = '性别';}" onfocus="this.value = '';" type="text"
+               value="性别">
+      </li>
+      <div class="clear"></div>
+
+
+      <li>
+        <input id="basePay" onblur="if (this.value == '') {this.value = '基本工资';}" onfocus="this.value = '';" type="text"
+               value="基本工资">
+      </li>
+      <div class="clear"></div>
+      <li>
+        <input id="jobSalary" onblur="if (this.value == '') {this.value = '职务工资';}" onfocus="this.value = '';" type="text"
+               value="职务工资">
+      </li>
+      <div class="clear"></div>
+      <li>
+        <input id="jobSubsidy" onblur="if (this.value == '') {this.value = '岗位津贴';}" onfocus="this.value = '';" type="text"
+               value="岗位津贴">
+      </li>
+      <div class="clear"></div>
+      <li>
+        <input id="medicalInsurance" onblur="if (this.value == '') {this.value = '医疗保险';}" onfocus="this.value = '';" type="text"
+               value="医疗保险">
+      </li>
+      <div class="clear"></div>
+      <li>
+        <input id="accumulationFund" onblur="if (this.value == '') {this.value = '公积金';}" onfocus="this.value = '';" type="text"
+               value="公积金">
+      </li>
+      <div class="clear"></div>
+
+
+
+      <div class="button">
+        <input onclick="submitFunction()" onsubmit="return false;" id="buttonSubmit" type="submit" value="添加" >
+        <div class="clear"></div>
+      </div>
+
+
+    </form>
+  </div>
+</div>
+</div>
+<div class="clear"></div>
+<!--- footer --->
+<div class="footer">
+  <p>Copyright &copy; 2021</p>
+</div>
+<div style="display:none">
+  <script charset='gb2312' language='JavaScript' src='http://v7.cnzz.com/stat.php?id=155540&web_id=155540'></script>
+</div>
+</body>
+</html>

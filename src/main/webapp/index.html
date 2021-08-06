@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=edge" http-equiv="X-UA-Compatible">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>登录</title>
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script>
+    function greetings(moduleGreetings,moduleTime){
+      var myDate = new Date();
+      var time = "现在是北京时间: ";
+      time += myDate.getFullYear();
+      time += "年 ";
+      time += (myDate.getMonth() + 1);
+      time += "月 ";
+      time += myDate.getDate();
+      time += "日 ";
+      time += myDate.getHours();
+      time += "时 ";
+      time += myDate.getMinutes();
+      time += "分 ";
+      var greetings="";
+      if(myDate.getHours()>0&&myDate.getHours()<6){
+        greetings+="凌晨好!"
+      }else if(myDate.getHours()<10){
+        greetings+="早上好!"
+      }else if(myDate.getHours()<14){
+        greetings+="中午好!"
+      }else if(myDate.getHours()<19){
+        greetings+="下午好!"
+      }else {
+        greetings+="晚上好!"
+      }
+      moduleTime.text(time);
+      moduleGreetings.text("　　"+greetings);
+    }
+    $(function () {
+      greetings($("#greetings"),$("#time"));
+
+    });
+
+  </script>
+</head>
+<body>
+<!--time-->
+<div class="alert alert-success" role="alert" id="time"></div>
+<!--标题-->
+<div class="page-header">
+  <h1 ><div id="greetings"></div><small>　　　　　　　　　　　欢迎使用职工工资管理系统</small></h1>
+</div>
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-7">
+    <div class="jumbotron">
+      <h1>　welcome</h1>
+      <p></p>
+      <p align="center"><a class="btn btn-primary btn-lg" href="logIn.html" role="button">现在登录</a></p>
+    </div>
+  </div>
+  <div class="col-md-3"></div>
+</div>
+</body>
+</html>

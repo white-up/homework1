@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>登录</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+        const reg_flag = /^\w{8,20}$/;//位数限定
+        /**
+         * 表单登录检验
+         * */
+        function checkUsername() {
+            const username = $("#UserName");
+            const usernameVal = username.val();
+            return reg_flag.test(usernameVal);
+        }
+
+        function checkPassword() {
+            const password = $("#Password");
+            const passwordVal = password.val();
+            return reg_flag.test(passwordVal);
+        }
+
+        function checkCode() {
+            const code = $("#Code");
+            const codeVal = code.val();
+            const judge = codeVal.length === 0;
+            return !judge;
+        }
+
+        $(function () {
+            $("#registerButton").click(function () {
+                if (checkUsername() && checkPassword() && checkCode()) {
+                    $.post("logInServlet", $("#registerForm").serialize(), function (data) {
+                        if (data.flag) {
+                            location.href = "functionMenu.html";
+                        } else {
+                            var sum = "注意: ";
+                            sum += data.errorMsg;
+                            $("#alertRegister").css("display", "inline");
+                            $("#alertRegister").text(sum);
+                        }
+                    });
+                } else {
+                    var sum = "注意: ";
+                    if (!checkCode()) {
+                        sum += "验证码不能为空! ";
+                    }
+                    if (!checkUsername()) {
+                        sum += "账号格式有误 ";
+                    }
+                    if (!checkPassword()) {
+                        sum += "密码格式有误 ";
+                    }
+                    $("#alertRegister").css("display", "inline");
+                    $("#alertRegister").text(sum);
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+<!--标头-->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">
+                <!--<img alt="" src="img/xiaohui%20(2).PNG">-->
+                登录系统
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="page-header">
+                <h2>　　欢迎使用<small>***管理系统</small></h2>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="jumbotron">
+                <h1>首次使用请注册激活</h1>
+                <p>如果您是首次使用本系统,请按提供方法激活账号</p>
+                <p><a class="btn btn-primary btn-lg" href="register.html" id="registerNow" role="button">现在注册</a></p>
+            </div>
+            <div style="text-align: center;">
+                <div class="alert alert-danger" id="alertRegister" role="alert" style="display: none "></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="container-fluid">
+                <!--轮播图-->
+                <div class="carousel slide" data-ride="carousel" id="carousel-example-generic">
+                    <!-- Indicators -->
+                    <ol class="carousel-indicators">
+                        <li class="active" data-slide-to="0" data-target="#carousel-example-generic"></li>
+                        <li data-slide-to="1" data-target="#carousel-example-generic"></li>
+                        <li data-slide-to="2" data-target="#carousel-example-generic"></li>
+                    </ol>
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner" role="listbox">
+                        <div class="item active">
+                            <img alt="..." src="img/library.png">
+                        </div>
+                        <!--<div class="item">
+                            <img src="img/banner_2.jpg" alt="...">
+                        </div>
+                        <div class="item">
+                            <img src="img/banner_3.jpg" alt="...">
+                        </div>-->
+                    </div>
+                    <!-- Controls -->
+                    <a class="left carousel-control" data-slide="prev" href="#carousel-example-generic" role="button">
+                        <span aria-hidden="true" class="glyphicon glyphicon-chevron-left"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="right carousel-control" data-slide="next" href="#carousel-example-generic" role="button">
+                        <span aria-hidden="true" class="glyphicon glyphicon-chevron-right"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+                <!--登录表单-->
+                <div class="container-fluid">
+                    <form accept-charset="utf-8" action="" id="registerForm" method="post">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">账　号</span>
+                            <input aria-describedby="basic-addon1" class="form-control" id="UserName"
+                                   name="username" placeholder="Username" type="text">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon2">密　码</span>
+                            <input aria-describedby="basic-addon1" class="form-control" id="Password"
+                                   name="password" placeholder="password" type="password">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon3">验证码</span>
+                            <input aria-describedby="basic-addon1" class="form-control" id="Code" name="check"
+                                   placeholder="Code" type="text">
+                        </div>
+
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <img alt="" height="32px" onclick="changeCheckCode(this)" src="checkCode">
+                    <script type="text/javascript">
+                        //图片点击事件
+                        function changeCheckCode(img) {
+                            img.src = "checkCode?" + new Date().getTime();
+                        }
+                    </script>
+
+                </div>
+                <button class="btn btn-primary" id="registerButton" type="button">登录</button>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<hr color="#ffd700">
+<footer>
+    <div id="footer">
+        <font color="gray" size="2">
+            <center>
+                ************<br>
+                作者*******&copy;**************
+            </center>
+        </font>
+    </div>
+</footer>
+</body>
+</html>

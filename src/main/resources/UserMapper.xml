@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="database.UserMapper">
+    <select id="findAll" resultType="entity.User">
+        select *from user
+    </select>
+    <select id="findByName" resultType="entity.User" parameterType="String">
+        select * from user where name like #{name}
+    </select>
+    <select id="findById" parameterType="int" resultType="entity.User">
+        select *from user where id = #{id}
+    </select>
+    <select id="findByGender" parameterType="String" resultType="entity.User">
+        select *
+        from user
+        where gender = #{gender}
+    </select>
+    <update id="updateNameById">
+        update user
+        set name =#{name}
+        where id = #{id}
+    </update>
+    <update
+     id="updateGenderById">update user set gender =#{gender} where id = #{id}
+    </update>
+    <update id="updateBasePayById">
+    update user set basePay =#{basePay} where id = #{id}
+    </update>
+    <update id="updateJobSalaryById">
+    update user set jobSalary = #{jobSalary} where id = #{id}
+    </update>
+    <update id="updateJobSubsidyById">
+    update user set jobSubsidy=#{jobSubsidy} where id = #{id}
+    </update>
+        <update id="updateMedicalInsuranceById">
+    update user set medicalInsurance = #{medicalInsurance} where id = #{id}
+    </update>
+        <update id="updateAccumulationFundById">
+    update user set accumulationFund=#{accumulationFund} where id = #{id}
+    </update>
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete
+        from user
+        where id = #{id}
+    </delete>
+    <insert id="addUser" parameterType="entity.User">
+        insert into user (name,gender,basePay,jobSalary,jobSubsidy,medicalInsurance,
+         accumulationFund) values (#{name},#{gender},#{basePay},#{jobSalary},#{jobSubsidy},
+         #{medicalInsurance},#{accumulationFund});
+    </insert>
+</mapper>
